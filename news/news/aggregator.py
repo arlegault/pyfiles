@@ -8,8 +8,8 @@ import json
 g = Goose()
 
 #sqsconn = boto.sqs.connect_to_region("us-west-2",
-#aws_access_key_id = 'AKIAITXWEVDOIW3YSCGQ',
-#aws_secret_access_key = 'EGnPM67fdSHrSJE02fb1fwRCBFcVaE/3qW3ZS8kr')
+#aws_access_key_id = 'redacted',
+#aws_secret_access_key = 'redacted')
 sqs = boto3.resource('sqs')
 news_queue = sqs.get_queue_by_name(QueueName='newsqueue')
 #news_queue = sqsconn.get_queue('newsqueue')
