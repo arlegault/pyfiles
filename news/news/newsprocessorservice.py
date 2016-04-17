@@ -4,7 +4,7 @@ from boto.sqs.message import Message
 
 sqsconn = boto.sqs.connect_to_region("us-west-2",
 aws_access_key_id = 'redacted',
-aws_secret_access_key = 'redacted/3qW3ZS8kr')
+aws_secret_access_key = 'redacted/')
 
 news_queue = sqsconn.get_queue('newsqueue')
 
