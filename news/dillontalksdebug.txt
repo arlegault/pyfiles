@@ -1,0 +1,25 @@
+pip install ipython
+
+execute- ipython -m ipdb (program name)
+
+-m           -is used for import
+
+l or list    -prints code 10 or so lines at a time
+
+s or step    -go to function
+
+a or args    -list args in function
+
+c or continue
+
+clear         - clear break points
+
+b or break    - set conditional break point
+
+slef.ns[params]   - can assign this in debug process
+
+import ipdb; ipdb.set_trace()     -you can import this anywhere in your code to set break points ahead of time
+
+item for sublist in lst for item in sublist - fastest way to flatten a list
+
+look at what a generator is ---calls data later instead of a method loading into RAM

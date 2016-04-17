@@ -1,0 +1,31 @@
+.context {
+     padding: 15px 25px;
+     font-size: 24px;
+     text-align: center;
+     cursor: pointer;
+     outline: none;
+     color: #fff;
+     background-color: #009DB9;
+     border: none;
+     border-radius: 15px;
+     box-shadow: 0 9px #999;
+   }
+
+.context:hover {
+      background-color: #00608F;
+	  color: #fff;
+   }
+
+.context:active {
+      background-color: #3e8e41;
+      box-shadow: 0 5px #666;
+      transform: translateY(4px);
+   }
+
+#debug {
+   padding: 15px 25px;
+   font-size: 10px;
+   border: 2px dashed grey;
+   border-radius: 15px;
+   width: 100%;
+}

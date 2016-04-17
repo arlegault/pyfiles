@@ -13,11 +13,14 @@ def readCSVtoList(csvname, arrayname):
 
 @app.route('/jokes', methods=['GET'])
 def JdJokes():
+    if not request.json:
 
-    joke_array = []
-    readCSVtoList('jeffdeanjokes.csv', joke_array)
+        joke_array = []
+        readCSVtoList('jeffdeanjokes.csv', joke_array)
 
-    return random.choice(joke_array)[0]
+        return random.choice(joke_array)[0]
+    else:
+        return "not json"
 
 
 

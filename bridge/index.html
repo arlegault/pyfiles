@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <!-- All necessary JS files -->
+   <script src="lib/leap-0.6.4.js"></script>
+   <script src="lib/leap-plugins-0.1.6.js"></script>
+   <script src="lib/three.js"></script>
+   <script src="//js.leapmotion.com/leap.rigged-hand-0.1.4.min.js"></script>
+   <script src="//code.jquery.com/jquery-2.1.1.min.js"></script>
+
+   <!-- Latest compiled and minified CSS -->
+   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+   <link rel="stylesheet" href="css/custom.css">
+</head>
+<body>
+   <div class="container-fluid"> <!-- container -->
+      <!-- navbar -->
+      <nav class="navbar navbar-default" style="max-width:700px">
+          <div class="navbar-header">
+
+               <img class="nav navbar-nav navbar-left" alt="Brand" src="images/logo.PNG" style="max-height:90px" >
+               <a class="navbar-brand" style="padding-left:40px; padding-top:0px;" href="#"><h1>bridge</h1> communication across culture</a>
+          </div>
+      </nav>
+      <!-- end navbar -->
+
+      <!-- main content -->
+
+      <div class="row">
+         <!-- left column -->
+            <div class="col-lg-2">
+               <div class="btn-group-vertical" role="group" style="" aria-label="...">
+                  <button type="button" class="btn btn-default context">shop</button>
+                  <button type="button" class="btn btn-default context">eat</button>
+                  <button type="button" class="btn btn-default context">taxi</button>
+                  <button type="button" class="btn btn-default context">doctor</button>
+                  <button type="button" class="btn btn-default context">meeting</button>
+                  <button type="button" class="btn btn-default context">dating</button>
+                  <div id="debug">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam. Sed nisi. Nulla quis sem at nibh elementum imperdiet. Duis sagittis ipsum. Praesent mauris. Fusce nec tellus sed augue semper porta. Mauris massa. Vestibulum lacinia arcu eget nulla. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.
+                  </div>
+               </div>
+            </div>
+
+         <!-- end left -->
+         <!-- right content -->
+         <div id="right" class="col-lg-10 col-lg-push-2">
+            <div id="output"></div>
+            <div id="output"></div>
+            <div id="progress"></div>
+            <div id="output_deg"></div>
+            <audio id="aud"></audio>
+         </div>
+         <!-- end right -->
+      </div>
+      <!-- end main content -->
+
+      <script>
+      // note: before implementing based off of this, you can instead grab the boneHand plugin, which does this all for you,
+      // better than the way it is done here.
+      // https://developer.leapmotion.com/gallery/bone-hands
+      // If you prefer to see exactly how it all works, read on..
+        var colors = [0xff0000, 0x00ff00, 0x0000ff];
+        var baseBoneRotation = (new THREE.Quaternion).setFromEuler(
+            new THREE.Euler(Math.PI / 2, 0, 0)
+        );
+        var dura = 0;
+        var jerry = "";
+        var shashank = "";
+        var numcounter = [];
+        var transmit = "";
+        var direction = "";
+      var strPos = 0;
+      /*
+        //start of direction pointer
+        var output = document.getElementById('output'),
+                progress = document.getElementById('progress');
+            // Set up the controller:
+            Leap.loop({background: true}, {
+                hand: function(hand){
+                          if(hand.yaw < 0)
+                          {
+                            shashank = "left";
+                            console.log("<<< LEFT <<<");
+                          }
+                          else {
+                            shashank = "right";
+                            console.log(">>> RIGHT >>>");
+                          }
+                      }
+            });
+        //end of direction pointer
+      */
+        //start of grab
+        var output = document.getElementById('output'),
+                progress = document.getElementById('progress');
+            // Set up the controller:
+            Leap.loop({background: true}, {
+                hand: function(hand){
+                          if(hand.grabStrength.toPrecision(2) > 0.7)
+                          {
+                            //console.log("Now, you can GRAB!!!");
+                            shashank = "grab";
+                          }
+                          progress.style.width = hand.grabStrength * 100 + '%';
+                      }
+            });
+        //end of grab
+      //start of pinch
+      if(shashank != "grab")
+      {
+            var output = document.getElementById('output'),
+            progress = document.getElementById('progress');
+          var pinchState;
+          // Set up the controller:
+          Leap.loop({background: true}, {
+            hand: function(hand){
+            if(hand.pinchStrength.toPrecision(2) > 0.8)
+            {
+              //console.log("Now, you can PINCH!");
+              shashank = "pinch";
+            }
+          }
+          });
+      };
+      //end of pinch
+      /*
+      //start of fingerWake
+      if(shashank != "grab" && shashank != "pinch")
+      {
+        var output_rad = document.getElementById('output_rad'),
+        	  output_deg = document.getElementById('output_deg'),
+        		progress = document.getElementById('progress');
+          window.TO_DEG = 180 / Math.PI;
+        	// Set up the controller:
+        	Leap.loop({background: true}, {
+            hand: function(hand){
+              var dotProduct = Leap.vec3.dot(
+                  hand.indexFinger.proximal.direction(),
+                  hand.middleFinger.proximal.direction()
+              );
+              var angle = Math.acos(dotProduct);
+              //output_rad.innerHTML = (angle ).toPrecision(2) + ' rad';
+              output_deg.innerHTML = (angle * TO_DEG).toPrecision(2);
+              //progress.style.width = angle * 100 + '%';
+              if((angle * TO_DEG).toPrecision(2)>15)
+              {
+                //console.log("Now, you can FINGERWAKE!!!");
+                shashank = "fingerWake";
+              }
+        	}
+          });
+      }
+      //end of fingerWake
+      */
+        function httpGetAsync_old(theUrl, callback)
+        {
+            var xmlHttp = new XMLHttpRequest();
+            xmlHttp.onreadystatechange = function() {
+                if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+                    callback(xmlHttp.responseText);
+            }
+            xmlHttp.open("GET", theUrl, true); // true for asynchronous
+            xmlHttp.send(null);
+        };
+        function httpGetAsync(theUrl, callback)
+        {
+            var x = document.getElementById('aud');
+            //alert(x + "***" + theUrl)
+            x.src = theUrl;
+            x.play();
+        };
+        var controller = Leap.loop({enableGestures: true}, function(frame){
+          if(frame.valid && frame.gestures.length > 0){
+            frame.gestures.forEach(function(gesture){
+                //gesture test start
+                //Both Hands
+                if(frame.hands.length > 1){
+                  //console.log(frame.hands.length);
+                  console.log("allhands");
+                }
+                //Total fingers
+                if(frame.fingers.length > 0){
+                  //console.log("testing: " + frame.fingers.length);
+                }
+                //Total pointables = total fingers?
+                if(frame.pointables.length > 0){
+                  //console.log("testing: " + frame.pointables.length);
+                }
+                //extended finger detection
+                if(frame.hands.length > 0){
+                  var firsthand = frame.hands[0];
+                  var fingerthumb = firsthand.fingers[0];
+                  var fingerindex = firsthand.fingers[1];
+                  var fingermiddle = firsthand.fingers[2];
+                  var fingerring = firsthand.fingers[3];
+                  var fingerpinky = firsthand.fingers[4];
+                  if (fingerthumb.extended){
+                    //console.log("ThumbsUp!");
+                    numcounter.push(0);
+                  }
+                  if (fingerindex.extended){
+                    //console.log("That!");
+                    numcounter.push(1);
+                  }
+                  if (fingermiddle.extended){
+                    //console.log("FO!");
+                    numcounter.push(2);
+                  }
+                  if (fingerring.extended){
+                    //console.log("Ring!");
+                    numcounter.push(3);
+                  }
+                  if (fingerpinky.extended){
+                    //console.log("Pinky!");
+                    numcounter.push(4);
+                  }
+                  if(frame.hands.length > 1){
+                    var secondhand = frame.hands[1];
+                    var finger2thumb = secondhand.fingers[0];
+                    var finger2index = secondhand.fingers[1];
+                    var finger2middle = secondhand.fingers[2];
+                    var finger2ring = secondhand.fingers[3];
+                    var finger2pinky = secondhand.fingers[4];
+                    if (finger2thumb.extended){
+                      //console.log("2ThumbsUp!");
+                      numcounter.push(5);
+                    }
+                    if (finger2index.extended){
+                      //console.log("2That!");
+                      numcounter.push(6);
+                    }
+                    if (finger2middle.extended){
+                      //console.log("2FO!");
+                      numcounter.push(7);
+                    }
+                    if (finger2ring.extended){
+                      //console.log("2Ring!");
+                      numcounter.push(8);
+                    }
+                    if (finger2pinky.extended){
+                      //console.log("2Pinky!");
+                      numcounter.push(9);
+                    }
+                  }
+                  //number counter
+                  //console.log("Counting Number: "+numcounter.length);
+                }
+      //          var hand = frame.hands[0];
+      //          var finger = hand.fingers[0];
+                //gesture test end
+                jerry = gesture.type;
+                //console.log("START POS"+strPos);
+                //console.log("POS"+gesture.position[1]);
+                //console.log("Z direction"+Math.abs(gesture.position[1] - strPos));
+                //console.log("<<<" + jerry);
+                switch (jerry){
+                  case "circle":
+                      //console.log(frame.gestures.length);
+                      break;
+                  case "keyTap":
+                      //console.log("Key Tap Gesture");
+                      break;
+                  case "screenTap":
+                      //console.log("Screen Tap Gesture");
+                      break;
+                  case "swipe":
+                      if(gesture.speed > 100 && gesture.speed < 300)
+                      {
+                        if(gesture.state="stop"){
+                          if(gesture.direction[0] > 0){
+                            direction = "right";
+                            console.log(gesture.speed+gesture.state+direction);
+                          }
+                          else{
+                            direction = "left";
+                            console.log(gesture.speed+gesture.state+direction);
+                          }
+                        }
+                      }
+                      if(Math.abs(gesture.position[1] - gesture.startPosition[1]) > 50)
+                      {
+                        jerry = 'keyTap';
+                      }
+                      else{
+                        if(direction=="left"){
+                          jerry = "lswipe";
+                        }
+                        else{
+                          jerry = "rswipe";
+                        }
+                      }
+                      break;
+                }
+              //  httpGetAsync("http://ec2-52-35-142-102.us-west-2.compute.amazonaws.com:9999/api/speech?textToSpeech="+gesture.type, function at(data)
+              if(jerry == "keyTap"){
+                switch(numcounter.length){
+                  case 10:
+                    transmit = jerry;       //Add ten in translate table
+                    break;
+                  case 1:
+                    transmit = "one";
+                    break;
+                  case 2:
+                    // thumb extended gestures
+                   if (fingerthumb.extended) {
+                        if (fingerindex.extended) {
+                          transmit = "freeze";
+                        } else if (fingerpinky.extended) {
+                          transmit = "shaka";
+                        }
+                   } else
+                      transmit = "two";
+                    break;
+                  case 3:
+                    if (!fingerthumb.extended && !fingerindex.extended) {
+						transmit = "pinch";
+					}
+					else{
+						transmit = "three";
+					}
+                    break;
+                  case 4:
+                    transmit = "four";
+                    break;
+                  case 5:
+                    transmit = "five";
+                    break;
+                  case 6:
+                    transmit = "six";
+                    break;
+                  case 7:
+                    transmit = "seven";
+                    break;
+                  case 8:
+                    transmit = "eight";
+                    break;
+                  case 9:
+                    transmit = "nine";
+                    break;
+                  default:
+                    tranmit = jerry;
+                }
+              }
+              else {
+                transmit = jerry;
+              }
+              if(shashank != "")
+              {
+                transmit = shashank;
+              }
+              numcounter = [];
+              jerry = "";
+              shashank = "";
+              console.log("=== "+transmit+" ===");
+              httpGetAsync("http://ec2-54-186-95-91.us-west-2.compute.amazonaws.com/leap/"+transmit, function at(data)
+              {
+                alert(data);
+              });
+                /*var myDataRef = new Firebase('https://bridge-augmentedlang.firebaseio.com/');
+                myDataRef.push({name: "shashank does a ", value: jerry});
+                myDataRef.on('child_added', function(snapshot) {
+                    var message = snapshot.val();
+                    console.log("haha " + message.value);
+                    //We'll fill this in later.
+                });*/
+            });
+          }
+        });
+      console.log("YOU ARE AWESOME!!!");
+        Leap.loop({background: true}, {
+          hand: function (hand) {
+            hand.fingers.forEach(function (finger) {
+              // This is the meat of the example - Positioning `the cylinders on every frame:
+              finger.data('boneMeshes').forEach(function(mesh, i){
+                var bone = finger.bones[i];
+                mesh.position.fromArray(bone.center());
+                mesh.setRotationFromMatrix(
+                  (new THREE.Matrix4).fromArray( bone.matrix() )
+                );
+                mesh.quaternion.multiply(baseBoneRotation);
+              });
+              finger.data('jointMeshes').forEach(function(mesh, i){
+                var bone = finger.bones[i];
+                if (bone) {
+                  mesh.position.fromArray(bone.prevJoint);
+                }else{
+                  // special case for the finger tip joint sphere:
+                  bone = finger.bones[i-1];
+                  mesh.position.fromArray(bone.nextJoint);
+                }
+              });
+            });
+            var armMesh = hand.data('armMesh');
+            armMesh.position.fromArray(hand.arm.center());
+            armMesh.setRotationFromMatrix(
+              (new THREE.Matrix4).fromArray( hand.arm.matrix() )
+            );
+            armMesh.quaternion.multiply(baseBoneRotation);
+            armMesh.scale.x = hand.arm.width / 2;
+            armMesh.scale.z = hand.arm.width / 4;
+          renderer.render(scene, camera);
+        }})
+          // these two LeapJS plugins, handHold and handEntry are available from leapjs-plugins, included above.
+          // handHold provides hand.data
+          // handEntry provides handFound/handLost events.
+        .use('handHold')
+        .use('handEntry')
+        .on('handFound', function(hand){
+          hand.fingers.forEach(function (finger) {
+            var boneMeshes = [];
+            var jointMeshes = [];
+            finger.bones.forEach(function(bone) {
+              // create joints
+              // CylinderGeometry(radiusTop, radiusBottom, height, radiusSegments, heightSegments, openEnded)
+              var boneMesh = new THREE.Mesh(
+                  new THREE.CylinderGeometry(5, 5, bone.length),
+                  new THREE.MeshPhongMaterial()
+              );
+              boneMesh.material.color.setHex(0xffffff);
+              scene.add(boneMesh);
+              boneMeshes.push(boneMesh);
+            });
+            for (var i = 0; i < finger.bones.length + 1; i++) {
+              var jointMesh = new THREE.Mesh(
+                  new THREE.SphereGeometry(8),
+                  new THREE.MeshPhongMaterial()
+              );
+              jointMesh.material.color.setHex(0x0088ce);
+              scene.add(jointMesh);
+              jointMeshes.push(jointMesh);
+            }
+            finger.data('boneMeshes', boneMeshes);
+            finger.data('jointMeshes', jointMeshes);
+          });
+          if (hand.arm){ // 2.0.3+ have arm api,
+            // CylinderGeometry(radiusTop, radiusBottom, height, radiusSegments, heightSegments, openEnded)
+            var armMesh = new THREE.Mesh(
+              new THREE.CylinderGeometry(1, 1, hand.arm.length, 64),
+              new THREE.MeshPhongMaterial()
+            );
+            armMesh.material.color.setHex(0xffffff);
+            scene.add(armMesh);
+            hand.data('armMesh', armMesh);
+          }
+        })
+        .on('handLost', function(hand){
+          hand.fingers.forEach(function (finger) {
+            var boneMeshes = finger.data('boneMeshes');
+            var jointMeshes = finger.data('jointMeshes');
+            boneMeshes.forEach(function(mesh){
+              scene.remove(mesh);
+            });
+            jointMeshes.forEach(function(mesh){
+              scene.remove(mesh);
+            });
+            finger.data({
+              boneMeshes: null,
+              boneMeshes: null
+            });
+          });
+          var armMesh = hand.data('armMesh');
+          scene.remove(armMesh);
+          hand.data('armMesh', null);
+          renderer.render(scene, camera);
+        })
+        .connect();
+        // all units in mm
+        var initScene = function () {
+          // put renderer in div
+          container = document.getElementById('right');
+         window.scene = new THREE.Scene();
+         window.renderer = new THREE.WebGLRenderer({
+           alpha: true
+         });
+
+         window.renderer.setClearColor(0x000000, 0);
+         window.renderer.setSize(window.innerWidth, window.innerHeight);
+
+         window.renderer.domElement.style.position = 'fixed';
+         window.renderer.domElement.style.top = '100px';
+         window.renderer.domElement.style.background = '';
+         window.renderer.domElement.style.left = '260px';
+         window.renderer.domElement.style.width = '80%';
+         window.renderer.domElement.style.height = '80%';
+         //add this to the container instead of body
+         container.appendChild(window.renderer.domElement);
+
+          var directionalLight = new THREE.DirectionalLight( 0xffffff, 1 );
+          directionalLight.position.set( 0, 0.5, 1 );
+          window.scene.add(directionalLight);
+          window.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
+          window.camera.position.fromArray([0, 100, 500]);
+          window.camera.lookAt(new THREE.Vector3(0, 160, 0));
+          window.addEventListener('resize', function () {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.render(scene, camera);
+          }, false);
+          scene.add(camera);
+          var geometry = new THREE.CubeGeometry(30, 45, 10);
+          var material = new THREE.MeshPhongMaterial({color: 0x0000cc});
+          window.cube = new THREE.Mesh(geometry, material);
+          cube.position.set(0,0,0);
+          cube.castShadow = true;
+          cube.receiveShadow = true;
+          scene.add(cube);
+          renderer.render(scene, camera);
+        };
+        initScene();
+        var rotateCube = function(){
+          cube.rotation.x += 0.01;
+          cube.rotation.y += 0.02;
+          renderer.render(scene, camera);
+          window.requestAnimationFrame(rotateCube);
+        };
+        rotateCube();
+      </script>
+
+</div> <!-- end container -->
+</body>
+</html>
